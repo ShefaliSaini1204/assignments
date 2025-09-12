@@ -5,37 +5,60 @@
 
 #define  MAX_LINES 100
 #define SET_SIZE  5
-#define MAX_LINE_LEN 256
+
+int is_valid_integer_value(const char *str)
+{
+if(*str=='\0')return 0;
+for(int i=0;i<str[i];i++)
+{
+if(!isdigit((unsigned char)str[i]))
+{
+return 0;
+}
+}
+return 1;
+}
 
 int check_input_numbers(const char* arg, int numbers[])
 {
-char* copy = strdup(arg);
-if(!copy)return -1;
+char* str = strdup(arg);
+if(!str)return -1;
 
-char *token = strtok(copy,",");
+char *token = strtok(str,",");
 int count = 0;
-while(token != NULL && count < SET_SIZE)
+
+while(token != NULL)
 {
+if(!is_valid_integer_value(token))
+{
+free(str);
+return -1;
+}
+
 int num = atoi(token);
 if(num<1 || num>99)
 {
-free(copy);
+free(str);
 return -1;
 }
-numbers[count]=num;
-count++;
+
+if(count >= SET_SIZE)
+{
+free(str);
+return -1;
+}
+
+numbers[count++] = num;
 token = strtok(NULL,",");
 }
 
-free(copy);
-if(count == SET_SIZE)
+free(str);
+if(count!=SET_SIZE)
 {
-return 0; 
+ return -1;
 }
- else
-{
-return -1;
-}
+
+return 0;
 }
 
 int check_line_numbers(const char* line, int numbers[])
@@ -43,11 +66,16 @@ int check_line_numbers(const char* line, int numbers[])
 int count = 0;
 const char *ptr = line;
 char *endptr;
-while(*ptr && count < SET_SIZE)
+
+while(*ptr)
 {
 while(*ptr && isspace((unsigned char)*ptr)){ptr++;}
 if(!*ptr){break;}
 
+if(!isdigit((unsigned char)*ptr))
+{
+return -1;
+}
 int num = strtol(ptr, &endptr, 10);
 if(ptr == endptr)
 {
@@ -57,18 +85,20 @@ if(num<1 || num>99)
 {
 return -1;
 }
+if(count >= SET_SIZE)
+{
+return -1;
+}
 numbers[count]=num;
 count++;
 ptr = endptr;
 }
-if(count == SET_SIZE)
-{
-return 0;
-}
-else
+if(count != SET_SIZE)
 {
 return -1;
 }
+
+return 0;
 }
 
 int are_unique(int numbers[])
@@ -116,7 +146,7 @@ int input[SET_SIZE];
 
 if(check_input_numbers(input_numbers,input)!=0)
 {
-fprintf(stderr,"Error: Input numbers should have total 5 comma separated digits or numbers should be between 1-99.\n");
+fprintf(stderr,"Error: Invalid input value. Input numbers should have total 5 comma separated digits, numbers should be between 1-99.\n");
 return 1;
 }
 
@@ -133,7 +163,7 @@ perror("Issue in opening the input file\n");
 return 1;
 }
 
-char one_line_of_file[MAX_LINE_LEN];
+char one_line_of_file[40];
 int one_line_numbers[SET_SIZE];
 int line_number = 0;
 int no_of_matches[SET_SIZE + 1][MAX_LINES];

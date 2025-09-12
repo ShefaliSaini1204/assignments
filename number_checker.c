@@ -9,7 +9,7 @@
 int is_valid_integer_value(const char *str)
 {
 if(*str=='\0')return 0;
-for(int i=0;i<str[i];i++)
+for(int i=0;str[i];i++)
 {
 if(!isdigit((unsigned char)str[i]))
 {
